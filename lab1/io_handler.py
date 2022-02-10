@@ -1,4 +1,12 @@
+from prettytable import PrettyTable
+
+
 def read_from_cli():
+    print("Введите матрицу в формате:")
+    print("В первой строке целое число n (1 <= n <= 20) — размерность матрицы.")
+    print("Далее следует n строк, в каждой n чисел — элемены матрицы.")
+    print("Последняя строка — коэффициенты матрицы.")
+
     n = int(input())
     matrix = [[float(i) for i in input().split()] for _ in range(n)]
     coefficients = list(map(float, input().split()))
@@ -7,33 +15,45 @@ def read_from_cli():
 
 
 def read_from_file(file_name):
-    try:
-        with open(file_name, 'r') as file:
-            n = int(file.readline())
-            matrix = [[float(i) for i in file.readline().split()] for _ in range(n)]
-            coefficients = list(map(float, file.readline().split()))
+    with open(file_name, 'r') as file:
+        n = int(file.readline())
+        matrix = [[float(i) for i in file.readline().split()] for _ in range(n)]
+        coefficients = list(map(float, file.readline().split()))
 
-            return matrix, coefficients
-    except OSError:
-        print("Файл не был прочитан, гудбай")
-        exit(1)
+        return matrix, coefficients
 
 
-def print_matrix(matrix):
-    for row in matrix:
-        print(' '.join(map(str, row)))
+def print_matrix(matrix, coefficients):
+    table = PrettyTable(["x" + str(i) for i in range(len(matrix))])
+    table.add_rows(matrix)
+    table.add_column("c", coefficients)
+
+    table.border = False
+    table.float_format = ".3"
+    print(table)
 
 
-def check_matrix():
-    pass
+def print_answer(answer):
+    print("Корни получились:")
+    table = PrettyTable(["x" + str(i) for i in range(len(answer))])
+    table.add_row(answer)
+
+    table.border = False
+    table.float_format = ".3"
+    print(table)
+
 
 def print_help():
-    print("only one param: --file")
+    print("only one param: file")
 
 
-def print_hello():
-    pass
+def print_hello(matrix, coefficients):
+    print("Ваша матрица:")
+    print_matrix(matrix, coefficients)
+    print()
 
 
 def print_triangle(matrix, coefficients):
-    pass
+    print("Треугольная матрица получилась такая:")
+    print_matrix(matrix, coefficients)
+    print()

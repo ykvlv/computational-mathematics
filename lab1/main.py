@@ -3,14 +3,38 @@ import sys
 from io_handler import *
 
 
+def get_minor(a, line_num, k):
+    m = []
+
+    for i in range(len(a)):
+        if i != line_num:
+            line = []
+            for j in range(len(a)):
+                if j != k:
+                    line.append(a[i][j])
+            m.append(line)
+    return m
+
+
+def get_determinant(a):
+    if len(a) == 1:
+        return a[0][0]
+
+    det = 0
+    sign = 1
+    for i in range(len(a)):
+        det += sign * a[0][i] * get_determinant(get_minor(a, 0, i))
+        sign *= -1
+    return det
+
+
 def permute_equation(target, a, b):
     for line in range(target + 1, len(a)):
         if a[line][target] != 0:
             a[line], a[target] = a[target], a[line]
             b[line], b[target] = b[target], b[line]
             return
-    print("Ну короче матрица не решается нолик мешает")
-    exit(1)
+    its_error()
 
 
 def make_triangle(a, b):
@@ -22,10 +46,10 @@ def make_triangle(a, b):
 
         for k in range(i + 1, n):
             c = a[k][i] / a[i][i]
-            # a[k][i] = 0
 
             for j in range(i, n):
                 a[k][j] -= c * a[i][j]
+            a[k][i] = 0
 
             b[k] -= c * b[i]
 
@@ -37,8 +61,7 @@ def calc_answer_by_reverse(a, b):
     for i in range(n - 1, -1, -1):
         s = 0
         if a[i][i] == 0:
-            print("Ну короче матрица не решается нолик мешает")
-            exit(1)
+            its_error()
 
         for j in range(i + 1, n):
             s += a[i][j] * x[j]

@@ -57,6 +57,11 @@ def print_help():
     print("only one param: file")
 
 
+def its_error():
+    print("Ну короче решений нет. Нолик мешает")
+    exit(1)
+
+
 def print_hello(matrix, coefficients):
     print("Ваша матрица:")
     print_matrix(matrix, coefficients)

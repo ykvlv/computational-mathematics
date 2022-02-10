@@ -29,18 +29,28 @@ def print_matrix(matrix, coefficients):
     table.add_column("c", coefficients)
 
     table.border = False
-    table.float_format = ".3"
+    # table.float_format = ".3"
     print(table)
 
 
-def print_answer(answer):
-    print("Корни получились:")
+def print_array(answer):
     table = PrettyTable(["x" + str(i) for i in range(len(answer))])
     table.add_row(answer)
 
     table.border = False
-    table.float_format = ".3"
+    # table.float_format = ".3"
     print(table)
+    print()
+
+
+def print_answer(answer):
+    print("Корни получились:")
+    print_array(answer)
+
+
+def print_residual(residual):
+    print("Невязки получились:")
+    print_array(residual)
 
 
 def print_help():

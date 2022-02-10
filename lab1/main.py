@@ -30,7 +30,7 @@ def make_triangle(a, b):
             b[k] -= c * b[i]
 
 
-def get_answer_by_reverse(a, b):
+def calc_answer_by_reverse(a, b):
     n = len(a)
     x = [0 for _ in range(n)]
 
@@ -48,16 +48,38 @@ def get_answer_by_reverse(a, b):
     return x
 
 
-def solve_gaussian(a, b):
-    print_hello(matrix, coefficients)
+def calc_residual(original_matrix, original_coefficient, answer):
+    mine_coefficient = [0 for _ in range(len(original_coefficient))]
 
+    for i in range(len(original_matrix)):
+        left_side = 0
+        for j in range(len(original_matrix)):
+            left_side += original_matrix[i][j] * answer[j]
+        mine_coefficient[i] = left_side
+
+    residual = [0 for _ in range(len(original_coefficient))]
+    for i in range(len(original_matrix)):
+        residual[i] = original_coefficient[i] - mine_coefficient[i]
+    return residual
+
+
+def solve_gaussian(a, b):
+    print_hello(a, b)
+
+    coefficients_copy = [i for i in b]
+    matrix_copy = [[j for j in i] for i in a]
+
+    print(coefficients_copy)
     make_triangle(a, b)
 
     print_triangle(a, b)
 
-    answer = get_answer_by_reverse(a, b)
+    answer = calc_answer_by_reverse(a, b)
 
     print_answer(answer)
+    residual = calc_residual(matrix_copy, coefficients_copy, answer)
+
+    print_residual(residual)
 
 
 if __name__ == '__main__':

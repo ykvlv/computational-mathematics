@@ -34,7 +34,7 @@ def permute_equation(target, a, b):
             a[line], a[target] = a[target], a[line]
             b[line], b[target] = b[target], b[line]
             return
-    its_error()
+    its_error(a, b)
 
 
 def make_triangle(a, b):
@@ -61,7 +61,7 @@ def calc_answer_by_reverse(a, b):
     for i in range(n - 1, -1, -1):
         s = 0
         if a[i][i] == 0:
-            its_error()
+            its_error(a, b)
 
         for j in range(i + 1, n):
             s += a[i][j] * x[j]
@@ -92,7 +92,6 @@ def solve_gaussian(a, b):
     coefficients_copy = [i for i in b]
     matrix_copy = [[j for j in i] for i in a]
 
-    print(coefficients_copy)
     make_triangle(a, b)
 
     print_triangle(a, b)

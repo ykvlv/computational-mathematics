@@ -4,7 +4,7 @@ from termcolor import cprint
 
 from iohandler import print_hello, print_help
 
-from methods import get_method
+from method import get_method
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
@@ -17,4 +17,8 @@ if __name__ == '__main__':
         print_help()
         sys.exit(1)
 
-    cprint(method.solve(), color="cyan")
+    report, table = method.solve()
+    # TODO вывод в файл
+    cprint(report, "cyan")
+    print()
+    cprint(table, "blue")

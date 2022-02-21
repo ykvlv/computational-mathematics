@@ -27,14 +27,14 @@ def read_accuracy(source: TextIO, is_cli: bool):
             if is_cli:
                 cprint("Значение погрешности вычисления не может быть меньше 0", "yellow")
             else:
-                cprint("Неверный формат теста. Значение погрешности вычисления не может быть меньше 0", "red")
+                cprint("Неверный формат теста. Значение погрешности вычисления не может быть меньше 0.", "red")
                 sys.exit(1)
         else:
             return accuracy
 
 
-def read_data(source: TextIO, is_initial_approximation: bool, is_cli: bool):
-    if is_initial_approximation:
+def read_data(source: TextIO, is_approximation: bool, is_cli: bool):
+    if is_approximation:
         initial_approximation = read_parameter(source, "Введите начальное приближение", is_cli)
 
         accuracy = read_accuracy(source, is_cli)

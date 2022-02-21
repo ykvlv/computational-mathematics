@@ -1,6 +1,9 @@
 import sys
 
+from termcolor import cprint
+
 from iohandler import print_hello, print_help
+
 from methods import get_method
 
 if __name__ == '__main__':
@@ -14,4 +17,4 @@ if __name__ == '__main__':
         print_help()
         sys.exit(1)
 
-    method.solve()
+    cprint(method.solve(), color="cyan")

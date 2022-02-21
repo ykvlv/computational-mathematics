@@ -1,17 +1,17 @@
 import sys
 
-
-from methods import *
+from iohandler import print_hello, print_help
+from methods import get_method
 
 if __name__ == '__main__':
-    sys.stdin.
     if len(sys.argv) < 2:
         print_hello()
-        method = get_method()
+        method = get_method(sys.stdin, True)
     elif sys.argv[1] == "file":
-        method = read_from_file(sys.argv[2])
+        file = open(sys.argv[2], "r")
+        method = get_method(file, False)
     else:
         print_help()
-
+        sys.exit(1)
 
     method.solve()

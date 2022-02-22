@@ -1,10 +1,9 @@
-# TODO исправить значения
 import sys
 
 from prettytable import PrettyTable
 from termcolor import cprint
 
-from iohandler import equation
+from math_helper import equation
 
 
 def simple_iteration_method(approximation: float, accuracy: float):

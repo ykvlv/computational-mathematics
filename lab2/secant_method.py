@@ -3,10 +3,10 @@ import sys
 from prettytable import PrettyTable
 from termcolor import cprint
 
-from iohandler import equation
+from math_helper import equation
 
 
-def secant_method(left_border: float, right_border: float, accuracy: float):
+def secant_method(left_border: float, right_border: float, accuracy: float) -> (str, PrettyTable):
     def f(x):
         return x ** 3 - 2.92 * x ** 2 + 1.435 * x + 0.791
 
@@ -25,10 +25,7 @@ def secant_method(left_border: float, right_border: float, accuracy: float):
 
     n = 0
     # TODO Выбор x0 ИСПРАВИТЬ
-    if f(left_border) * (6 * left_border - 6.25) > 0:
-        prev_x = left_border
-    else:
-        prev_x = right_border
+    prev_x = right_border
 
     xi = prev_x * accuracy * 2  # x1 выбирается рядом с x0 самостоятельно
     table.add_row([n, prev_x, f(prev_x), xi, f(xi), cal(prev_x, xi), f(cal(prev_x, xi)), abs(xi - cal(prev_x, xi))])

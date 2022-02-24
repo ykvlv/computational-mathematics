@@ -1,10 +1,10 @@
 import sys
-from typing import TextIO
+from typing import TextIO, Callable
 
 from prettytable import PrettyTable
 from termcolor import cprint, colored
 
-from math_helper import equation
+equation = "x³ - 2.92x² + 1.435x + 0.791"
 
 
 def read_parameter(input_stream: TextIO, invite: str, with_invite: bool) -> float:
@@ -52,6 +52,14 @@ def read_data(input_stream: TextIO, is_approximation: bool, with_invite: bool):
         return left_border, right_border, accuracy
 
 
+def make_report(f: Callable[[float], float], iterations: float, root: int, iter_end: float):
+    return f"Выполнено решение уравнения {equation}.\n" \
+           f"Х = {root}\n" \
+           f"Количество итераций i = {iterations}\n" \
+           f"Критерий окончания итерационного процесса |x-x0| = {iter_end}\n" \
+           f"f({root}) = {f(root)}"
+
+
 def make_table(fields: [str], rows: [[str]]) -> PrettyTable:
     table = PrettyTable(fields)
     table.add_rows(rows)
@@ -67,7 +75,7 @@ def print_help():
     print("\t--out [file_path] — запись в файл")
     print("\t--in [file_path] — чтение из файла")
     print("Пример входного файла:")
-    print("\t1")
+    print("\t2")
     print("\t-0.2136")
     print("\t2.2839")
     print("\t0.001")
@@ -76,5 +84,5 @@ def print_help():
 def print_hello():
     print(f"Решение уравнения {colored(equation, 'magenta', attrs=['underline'])}. Доступные методы:\n" +
           colored(f"2\tМетод хорд\n"
-                  f"5\tМетод простой итерации\n"
-                  f"7\tПоебота какая-то", "magenta"))
+                  f"4\tМетод секущих\n"
+                  f"5\tМетод простой итерации", "magenta"))

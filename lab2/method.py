@@ -3,10 +3,13 @@ from typing import TextIO
 
 from termcolor import cprint
 
-from chord_method import chord_method
+from methods import chord_method, secant_method, simple_iteration_method
 from io_helper import print_hello, read_data
-from secant_method import secant_method
-from simple_iteration_method import simple_iteration_method
+
+
+def f(x: float):
+    """ Используемая функция """
+    return x ** 3 - 2.92 * x ** 2 + 1.435 * x + 0.791
 
 
 class Method:
@@ -15,7 +18,7 @@ class Method:
         self.args = args
 
     def solve(self):
-        report, table = self.method(*self.args)
+        report, table = self.method(f, *self.args)
         return report, str(table)
 
 
@@ -25,23 +28,17 @@ def get_method(input_stream: TextIO, with_invite: bool):
     while True:
         if with_invite:
             print("Введите номер метода", end=": ", flush=True)
-        try:
-            method_number = int(input_stream.readline().strip())
-            if method_number == 2:
-                return Method(chord_method, read_data(input_stream, False, with_invite))
-            elif method_number == 5:
-                return Method(simple_iteration_method, read_data(input_stream, True, with_invite))
-            elif method_number == 7:
-                return Method(secant_method, read_data(input_stream, False, with_invite))
-            else:
-                if with_invite:
-                    cprint("Такого метода еще не придумали, братишка. Целое число от 1 до 3...", "yellow")
-                else:
-                    cprint("Неверный формат теста. Номер метода — Целое число от 1 до 3.", "red")
-                    sys.exit(1)
-        except ValueError as e:
+
+        method_number = input_stream.readline().strip()
+        if method_number == "2":
+            return Method(chord_method, read_data(input_stream, False, with_invite))
+        elif method_number == "4":
+            return Method(simple_iteration_method, read_data(input_stream, True, with_invite))
+        elif method_number == "5":
+            return Method(secant_method, read_data(input_stream, False, with_invite))
+        else:
             if with_invite:
-                cprint("Целое число от 1 до 3... " + str(e), "yellow")
+                cprint("Такого метода еще не придумали, братишка. Только 2, 4, 5", "yellow")
             else:
-                cprint("Неверный формат теста. Требуется номер метода. " + str(e), "red")
+                cprint("Неверный формат теста. Возможные номера методов — 2, 4, 5.", "red")
                 sys.exit(1)

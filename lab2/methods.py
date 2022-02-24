@@ -4,8 +4,8 @@ from typing import Callable
 from prettytable import PrettyTable
 from termcolor import cprint
 
-from io_helper import make_table, make_report
-from math_helper import dd
+from io_helper import make_table, make_report, make_graph
+from math_helper import dd, d
 
 
 def chord_method(f: Callable[[float], float], a: float, b: float, accuracy: float,
@@ -28,99 +28,94 @@ def chord_method(f: Callable[[float], float], a: float, b: float, accuracy: floa
     x = (a * f(b) - b * f(a)) / (f(b) - f(a))
     rows.append([i, a, b, x, f(a), f(b), f(x), abs(a - b)])
 
-    while abs(a - b) > accuracy and i < max_iterations:
+    while abs(x - x0) > accuracy and i < max_iterations:
+        i += 1
+
         if f(x) * f(a) < 0:
             b = x
         else:
             a = x
 
-        x0 = x
-        i += 1
-        x = (a * f(b) - b * f(a)) / (f(b) - f(a))
+        x0, x = x, (a * f(b) - b * f(a)) / (f(b) - f(a))
         rows.append([i, a, b, x, f(a), f(b), f(x), abs(a - b)])
 
-    return make_report(f, i, x, abs(a - b)), make_table(fields, rows)
+    make_graph(abs(x), abs(f(x)), f)
+
+    return make_report(f, i, x, abs(x - x0)), make_table(fields, rows)
 
 
-def secant_method(left_border: float, right_border: float, accuracy: float) -> tuple[str, PrettyTable]:
-    def f(x):
-        return x ** 3 - 2.92 * x ** 2 + 1.435 * x + 0.791
+def secant_method(f: Callable[[float], float], a: float, b: float, accuracy: float,
+                  max_iterations: int = 100) -> tuple[str, PrettyTable]:
+    """ Метод секущих """
+    fields = ["i", "xi-1", "f(xi-1)", "xi", "f(xi)", "xi+1", "f(xi+1)", "|xi - xi+1|"]
+    rows = []
 
-    def cal(_prev_x, _xi):
-        return xi - (xi - prev_x) * f(xi) / (f(xi) - f(prev_x))
+    def cal(prev_x, now_x):
+        return now_x - (now_x - prev_x) * f(now_x) / (f(now_x) - f(prev_x))
 
     # условие применимости метода Ньютона
-    if f(left_border) * f(right_border) > 0:
-        cprint(f"На концах отрезка [{left_border}, {right_border}] функция имеет одинаковые знаки.\n"
+    if f(a) * f(b) > 0:
+        cprint(f"На концах отрезка [{a}, {b}] функция имеет одинаковые знаки.\n"
                f"На отрезке либо нет корней, либо их четное количество. Пожалуйста, уточните интервал.", "red")
         sys.exit(1)
 
-    table = PrettyTable(["N", "X(k-1)", "f(X(k-1))", "X(k)", "f(X(k))", "X(k+1)", "f(X(k+1))", "|X(k)-X(k+1)|"])
-    table.float_format = ".5"
-    table.border = False
+    # выбор x0
+    if f(a) * 2 * (3 * a - 5.84) > 0:
+        x0 = a
+    else:
+        x0 = b
 
-    n = 0
-    # TODO Выбор x0 ИСПРАВИТЬ
-    prev_x = right_border
+    # инициализация
+    i = 0
+    xi = x0 * accuracy * 2  # x1 выбирается рядом с x0 самостоятельно
+    rows.append([i, x0, f(x0), xi, f(xi), cal(x0, xi), f(cal(x0, xi)), abs(xi - cal(x0, xi))])
 
-    xi = prev_x * accuracy * 2  # x1 выбирается рядом с x0 самостоятельно
-    table.add_row([n, prev_x, f(prev_x), xi, f(xi), cal(prev_x, xi), f(cal(prev_x, xi)), abs(xi - cal(prev_x, xi))])
-    while abs(xi - prev_x) > accuracy:
-        k = xi
-        xi = cal(prev_x, xi)
-        prev_x = k
-        n += 1
-        table.add_row([n, prev_x, f(prev_x), xi, f(xi), cal(prev_x, xi), f(cal(prev_x, xi)), abs(xi - cal(prev_x, xi))])
+    while abs(xi - x0) > accuracy and i < max_iterations:
+        i += 1
 
-    return f"Выполнено решение уравнения методом секущих.\n" \
-           f"Х = {xi}\n" \
-           f"Количество итераций n = {n}\n" \
-           f"Критерий окончания итерационного процесса |a-b| = {abs(xi - prev_x)}\n" \
-           f"f({xi}) = {f(xi)}", table
+        x0, xi = xi, cal(x0, xi)
+        rows.append([i, x0, f(x0), xi, f(xi), cal(x0, xi), f(cal(x0, xi)), abs(xi - cal(x0, xi))])
+
+    return make_report(f, i, xi, abs(xi - x0)), make_table(fields, rows)
 
 
-def simple_iteration_method(approximation: float, accuracy: float):
-    # TODO бред lamb
-    def f1(x):
-        return x + lamb * (x ** 3 - 3.125 * x ** 2 - 3.5 * x + 2.458)
+def simple_iteration_method(f: Callable[[float], float], approximation: float, accuracy: float,
+                            max_iterations: int = 100) -> tuple[str, PrettyTable]:
+    """ Метод простых итераций """
 
-    def f2(x):
-        return (3.125 * x ** 2 + 3.5 * x - 2.458) ** (1 / 3)
+    def calculate_answer(func: Callable[[float], float]) -> tuple[str, PrettyTable]:
+        fields = ['i', 'xi', 'f(x)', 'xi+1', 'φ(xi)', '|xi - xi+1|']
+        rows = []
 
-    def calculate_answer(func):
-        # TODO таблицу
-        table = PrettyTable()
-
+        # инициализация
+        i = 0
         x0 = approximation
-        n = 0
-        while True:
-            x1 = func(x0)
-            n += 1
-            f = x1 ** 3 - 3.125 * x1 ** 2 - 3.5 * x1 + 2.458
-            # Для более точного ответа
-            if abs(f) <= accuracy:
-                break
-            x0 = x1
+        x = func(x0)
+        rows.append([i, x0, f(x0), x, func(x), abs(x - x0)])
 
-        return f"Выполнено решение уравнения  методом простых итераций.\n" \
-               f"X = {x1}\n" \
-               f"Количество итераций n = {n}\n" \
-               f"f({x1})={f}", table
+        while abs(f(x)) > accuracy and i < max_iterations:
+            i += 1
+
+            x0, x = x, func(x0)
+            rows.append([i, x0, f(x0), x, func(x), abs(x - x0)])
+
+        return make_report(func, i, x, abs(f(x))), make_table(fields, rows)
 
     # подставим в производную функцию значение начального приближения
-    f_approximation = 3 * approximation ** 2 - 6.25 * approximation - 3.5
-    lamb = -1 / f_approximation
+    f_approximation = d(f, approximation)
+    lmb = -1 / f_approximation
+    q = 1
 
     # сходится ли метод простой итерации
-    if abs(3 * lamb * approximation ** 2 - 6.25 * lamb * approximation + 1 - 3.5 * lamb) < 1 and (
+    if abs(3 * lmb * approximation ** 2 - 5.84 * lmb * approximation + q + 1.435 * lmb) < q and (
             approximation > 0 or approximation < -1):
         # достаточное условие сходимости выполнено и начальное приближение не лежит в интервале от -1 до 0
-        return calculate_answer(f1)
+        return calculate_answer(lambda x: x + lmb * f(x))
     else:
-        fi1 = 6.25 * approximation + 3.5 / 3 / ((3.125 * approximation ** 2 + 3.5 * approximation - 2.458) ** 2) ** (
-                1 / 3)
+        fi1 = (- 5.84 * approximation + 1.435) / 3 / (
+                    (- 2.92 * approximation ** 2 + 1.435 * approximation + 0.791) ** 2) ** (1 / 3)
         if abs(fi1) < 1:
-            return calculate_answer(f2)
+            return calculate_answer(lambda x: - 2.92 * x ** 2 + 1.435 * x + 0.791)
         else:
             cprint("Начальное приближение неверно, не выполняется достаточное условие сходимости метода.", "red")
             sys.exit(1)

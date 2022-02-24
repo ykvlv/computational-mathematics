@@ -10,6 +10,7 @@ if __name__ == '__main__':
     with_invite = True
     output_stream = sys.stdout
     is_file_output = False
+    with_graph = False
 
     if "--help" in sys.argv:
         print_help()
@@ -23,11 +24,14 @@ if __name__ == '__main__':
             sys.exit(e.errno)
     if "--out" in sys.argv:
         try:
-            output_stream = open(sys.argv[sys.argv.index("--out") + 1], "w")
+            file_name = sys.argv[sys.argv.index("--out") + 1]
+            output_stream = open(file_name, "w")
             is_file_output = True
         except OSError as e:
             cprint("Записать в файл не получится. " + e.strerror, "red")
             sys.exit(e.errno)
+    if "--graph" in sys.argv:
+        with_graph = True
 
     method = get_method(input_stream, with_invite)
     report, table = method.solve()
@@ -36,7 +40,7 @@ if __name__ == '__main__':
     if is_file_output:
         output_stream.write(report + "\n\n")
         output_stream.write("Таблица итераций:\n" + table)
-        cprint("Программа успешно завершила работу!", "green")
+        cprint(f"Файл {file_name} записан успешно!", "green")
     else:
         output_stream.write(colored(report + "\n\n", "cyan"))
         output_stream.write(colored("Таблица итераций:\n" + table + "\n", "blue"))

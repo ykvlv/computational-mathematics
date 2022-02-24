@@ -1,6 +1,8 @@
 import sys
 from typing import TextIO, Callable
 
+import numpy as np
+import matplotlib.pyplot as plt
 from prettytable import PrettyTable
 from termcolor import cprint, colored
 
@@ -52,11 +54,11 @@ def read_data(input_stream: TextIO, is_approximation: bool, with_invite: bool):
         return left_border, right_border, accuracy
 
 
-def make_report(f: Callable[[float], float], iterations: float, root: int, iter_end: float):
+def make_report(f: Callable[[float], float], iterations: int, root: float, iter_end: float):
     return f"Выполнено решение уравнения {equation}.\n" \
            f"Х = {root}\n" \
            f"Количество итераций i = {iterations}\n" \
-           f"Критерий окончания итерационного процесса |x-x0| = {iter_end}\n" \
+           f"Критерий окончания итерационного процесса = {iter_end}\n" \
            f"f({root}) = {f(root)}"
 
 
@@ -67,6 +69,27 @@ def make_table(fields: [str], rows: [[str]]) -> PrettyTable:
     table.border = False
     table.float_format = ".5"
     return table
+
+
+def make_graph(bx, by, f):
+    vf = np.vectorize(f)
+    x = np.linspace(-bx, bx, 100)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+
+    plt.grid(True)
+    plt.xlim((-bx, bx))
+    plt.ylim((-by, by))
+
+    ax.spines['left'].set_position('center')
+    ax.spines['bottom'].set_position('center')
+    ax.spines['right'].set_color('none')
+    ax.spines['top'].set_color('none')
+
+    ax.plot(x, vf(x), 'g', label='y=f(x)')
+
+    plt.show()
 
 
 def print_help():

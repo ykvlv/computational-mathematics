@@ -1,14 +1,14 @@
-from typing import TextIO, Callable
+from typing import TextIO
 
 from prettytable import PrettyTable
 
-from methods import chord_method, secant_method, simple_iteration_method
-from io_helper import print_hello, read_data, error, fatal_error
+from methods import chord_method, secant_method, simple_iteration_method, system_simple_iteration_method
+from io_helper import read_data, fatal_error, read_system, choose_from_list
 
 
 def f(x: float) -> float:
     """ Используемая функция """
-    return x**3 - 2.92 * x**2 + 1.435 * x + 0.791
+    return x ** 3 - 2.92 * x ** 2 + 1.435 * x + 0.791
 
 
 class Method:
@@ -21,22 +21,32 @@ class Method:
         return report, table
 
 
-def get_method(input_stream: TextIO, with_invite: bool) -> Method:
-    if with_invite:
-        print_hello()
-    while True:
-        if with_invite:
-            print("Введите номер метода", end=": ", flush=True)
+methods = [
+    [
+        "Метод хорд",
+        chord_method
+    ], [
+        "Метод секущих",
+        secant_method
+    ], [
+        "Метод простой итерации",
+        simple_iteration_method
+    ], [
+        "Система методом простой итерации",
+        system_simple_iteration_method
+    ]
+]
 
-        method_number = input_stream.readline().strip()
-        if method_number == "2":
-            return Method(chord_method, read_data(input_stream, False, with_invite))
-        elif method_number == "4":
-            return Method(secant_method, read_data(input_stream, False, with_invite))
-        elif method_number == "5":
-            return Method(simple_iteration_method, read_data(input_stream, True, with_invite))
-        else:
-            if with_invite:
-                error("Такого метода еще не придумали, братишка. Только 2, 4, 5.")
-            else:
-                fatal_error("Неверный формат теста. Возможные номера методов — 2, 4, 5.")
+
+def get_method(input_stream: TextIO, with_invite: bool) -> Method:
+    method_number = choose_from_list(input_stream, methods, "Выберите метод", with_invite)
+    if method_number == 0:
+        return Method(chord_method, read_data(input_stream, False, with_invite))
+    elif method_number == 1:
+        return Method(secant_method, read_data(input_stream, False, with_invite))
+    elif method_number == 2:
+        return Method(simple_iteration_method, read_data(input_stream, True, with_invite))
+    elif method_number == 3:
+        return Method(system_simple_iteration_method, read_system(input_stream, with_invite))
+    else:
+        fatal_error("Такого метода не существует.")

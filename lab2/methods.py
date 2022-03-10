@@ -105,3 +105,20 @@ def secant_method(f: Callable[[float], float], a: float, b: float, accuracy: flo
 
         i += 1
         x0, xi = xi, calc(x0, xi)
+
+
+def system_simple_iteration_method(f, f1, a1: float, f2, a2: float, accuracy, max_iterations: int = 100):
+    x01, x02 = a1, a2
+
+    i = 0
+    while True:
+        xi1 = f1(x01, x02)
+        xi2 = f2(x01, x02)
+
+        if abs(xi1 - x01) < accuracy or abs(xi2 - x02) < accuracy or i > max_iterations:
+            print(i)
+            print(xi1, xi2)
+            return "решил"
+
+        i += 1
+        x01, x02 = xi1, xi2

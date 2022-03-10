@@ -1,4 +1,7 @@
-def d(function, value: float, h: float = 0.000000001):
+from typing import Callable
+
+
+def d(function: Callable[[float], float], value: float, h: float = 0.000000001):
     """ Считает производную функции """
     top = function(value + h) - function(value)
     bottom = h
@@ -6,6 +9,6 @@ def d(function, value: float, h: float = 0.000000001):
     return slope
 
 
-def dd(function, value: float, h: float = 0.000000001):
+def dd(function: Callable[[float], float], value: float, h: float = 0.000000001):
     """ Считает производную второго порядка """
     return (d(function, value + h, h) - d(function, value, h)) / h

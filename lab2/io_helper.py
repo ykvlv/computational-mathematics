@@ -9,6 +9,15 @@ from termcolor import cprint, colored
 equation = "x³ - 2.92x² + 1.435x + 0.791"
 
 
+def error(msg: str):
+    cprint(msg, "yellow")
+
+
+def fatal_error(msg: str):
+    cprint(msg, "red")
+    sys.exit(1)
+
+
 def read_parameter(input_stream: TextIO, invite: str, with_invite: bool) -> float:
     while True:
         if with_invite:
@@ -18,10 +27,9 @@ def read_parameter(input_stream: TextIO, invite: str, with_invite: bool) -> floa
             return float(inp)
         except ValueError as e:
             if with_invite:
-                cprint("Требуется десятичное число. " + str(e), "yellow")
+                error("Требуется десятичное число. " + str(e))
             else:
-                cprint("Неверный формат теста. " + str(e), "red")
-                sys.exit(e)
+                fatal_error("Неверный формат теста. " + str(e))
 
 
 def read_accuracy(input_stream: TextIO, with_invite: bool) -> float:
@@ -29,10 +37,9 @@ def read_accuracy(input_stream: TextIO, with_invite: bool) -> float:
         accuracy = read_parameter(input_stream, "Введите погрешность вычисления", with_invite)
         if accuracy <= 0:
             if with_invite:
-                cprint("Значение погрешности вычисления должна быть больше 0", "yellow")
+                error("Значение погрешности вычисления должна быть больше 0")
             else:
-                cprint("Неверный формат теста. Значение погрешности вычисления не может быть меньше 0.", "red")
-                sys.exit(1)
+                fatal_error("Неверный формат теста. Значение погрешности вычисления не может быть меньше 0.")
         else:
             return accuracy
 
@@ -48,7 +55,7 @@ def read_data(input_stream: TextIO, is_approximation: bool, with_invite: bool):
         right_border = read_parameter(input_stream, "Введите правую границу интервала", with_invite)
         if right_border < left_border:
             left_border, right_border = right_border, left_border
-            cprint("Правая граница меньше левой. ъъъ ок я поправлю...", "yellow")
+            error("Правая граница меньше левой. ъъъ ок я поправлю...")
 
         accuracy = read_accuracy(input_stream, with_invite)
         return left_border, right_border, accuracy
@@ -67,28 +74,36 @@ def make_table(fields: [str], rows: [[str]]) -> PrettyTable:
     table.add_rows(rows)
 
     table.border = False
-    table.float_format = ".5"
+    table.float_format = ".3"
     return table
 
 
-def make_graph(bx, by, f):
-    vf = np.vectorize(f)
-    x = np.linspace(-bx, bx, 100)
+def show_graph(f, root):
+    # Интервал изменения переменной по оси X
+    x_min = -0.6
+    x_max = 2.5
 
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
+    # Количество отсчетов на заданном интервале
+    count = 200
 
-    plt.grid(True)
-    plt.xlim((-bx, bx))
-    plt.ylim((-by, by))
+    # Создадим список координат по оси X на отрезке [x_min; x_max]
+    x_list = np.linspace(x_min, x_max, count)
 
-    ax.spines['left'].set_position('center')
-    ax.spines['bottom'].set_position('center')
-    ax.spines['right'].set_color('none')
-    ax.spines['top'].set_color('none')
+    # Вычислим значение функции в заданных точках
+    y_list = [f(x) for x in x_list]
 
-    ax.plot(x, vf(x), 'g', label='y=f(x)')
+    # Нарисуем одномерный график
+    plt.plot(x_list, y_list)
 
+    # Нарисуем оси
+    ax = plt.gca()
+    ax.axhline(y=0, color='k')
+    ax.axvline(x=0, color='k')
+
+    # Добавим корень
+    ax.plot(root, 0, 'o')
+
+    # Покажем окно с нарисованным графиком
     plt.show()
 
 

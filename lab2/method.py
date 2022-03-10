@@ -1,13 +1,12 @@
-import sys
-from typing import TextIO
+from typing import TextIO, Callable
 
-from termcolor import cprint
+from prettytable import PrettyTable
 
 from methods import chord_method, secant_method, simple_iteration_method
-from io_helper import print_hello, read_data
+from io_helper import print_hello, read_data, error, fatal_error
 
 
-def f(x: float):
+def f(x: float) -> float:
     """ Используемая функция """
     return x**3 - 2.92 * x**2 + 1.435 * x + 0.791
 
@@ -17,12 +16,12 @@ class Method:
         self.method = method
         self.args = args
 
-    def solve(self):
+    def solve(self) -> tuple[str, PrettyTable]:
         report, table = self.method(f, *self.args)
-        return report, str(table)
+        return report, table
 
 
-def get_method(input_stream: TextIO, with_invite: bool):
+def get_method(input_stream: TextIO, with_invite: bool) -> Method:
     if with_invite:
         print_hello()
     while True:
@@ -38,7 +37,6 @@ def get_method(input_stream: TextIO, with_invite: bool):
             return Method(simple_iteration_method, read_data(input_stream, True, with_invite))
         else:
             if with_invite:
-                cprint("Такого метода еще не придумали, братишка. Только 2, 4, 5", "yellow")
+                error("Такого метода еще не придумали, братишка. Только 2, 4, 5.")
             else:
-                cprint("Неверный формат теста. Возможные номера методов — 2, 4, 5.", "red")
-                sys.exit(1)
+                fatal_error("Неверный формат теста. Возможные номера методов — 2, 4, 5.")

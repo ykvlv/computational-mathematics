@@ -53,3 +53,18 @@ def simpsons_method(f: Symbol, a: float, b: float, n: int) -> float:
     yn = f.subs(x, right)
     # print(f"xn {right:.3f}\t\tyn {yn:.3f}")
     return (h / 3) * (y0 + 4 * odds + 2 * evens + yn)
+
+
+def simple_simpsons_method(f: Symbol, a: float, b: float, n: int) -> float:
+    if n % 2 != 0:
+        fatal_error("Для метода Симпсона необходимо четное число разбиений.")
+    h = (b - a) / n  # длина отрезка
+    arr = arange(a, b, h)  # массив отрезков
+
+    y0 = f.subs(x, a)  # y нулевое
+    yn = f.subs(x, b)  # y последнее
+
+    odds = sum(f.subs(x, arr[i]) for i in range(1, n, 2))  # результат функции на нечетных отрезках
+    evens = sum(f.subs(x, arr[i]) for i in range(2, n, 2))  # результат функции на четных отрезках
+
+    return (h / 3) * (y0 + 4 * odds + 2 * evens + yn)  # формула Симпсона

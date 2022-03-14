@@ -1,8 +1,15 @@
+from sys import exit
+
 from termcolor import cprint
 
 
 def error(msg: str) -> None:
     cprint(msg, "yellow")
+
+
+def fatal_error(msg: str) -> None:
+    cprint(msg, "red")
+    exit(1)
 
 
 def read_int(invite: str) -> int:

@@ -30,6 +30,15 @@ def read_float(invite: str) -> float:
             error("Требуется десятичное число.")
 
 
+def read_accuracy(invite: str) -> float:
+    while True:
+        accuracy = read_float(invite)
+        if accuracy <= 0 or accuracy >= 1:
+            fatal_error("Значение погрешности вычисления должно находиться в промежутке (0, 1)")
+        else:
+            return accuracy
+
+
 def choose_from_dict(d: dict, invite: str) -> str:
     keys = list(d)
     cprint("\n".join(list(f"{i + 1}\t{k}" for i, k in enumerate(keys))), "magenta")
@@ -41,11 +50,12 @@ def choose_from_dict(d: dict, invite: str) -> str:
             return keys[i]
 
 
-def read_parameters() -> (float, float, int):
+def read_parameters() -> (float, float, float, int):
     left_limit = read_float("Введите левый предел")
     right_limit = read_float("Введите правый предел")
     if right_limit < left_limit:
         left_limit, right_limit = right_limit, left_limit
         error("Правый предел меньше левого. Ок я поправлю...")
     n = read_int("Введите число разбиений")
-    return left_limit, right_limit, n
+    accuracy = read_accuracy("Введите погрешность вычисления")
+    return left_limit, right_limit, n, accuracy

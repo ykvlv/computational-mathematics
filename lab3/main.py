@@ -10,10 +10,10 @@ functions = {
 }
 
 methods = {
-    "Метод прямоугольников (левые)": lambda f, p: rectangle_method(RectangleType.LEFT, f, *p),
-    "Метод прямоугольников (средние)": lambda f, p: rectangle_method(RectangleType.MIDDLE, f, *p),
-    "Метод прямоугольников (правые)": lambda f, p: rectangle_method(RectangleType.RIGHT, f, *p),
-    "Метод Симпсона": lambda f, p: simpsons_method(f, *p)
+    "Метод прямоугольников (левые)": lambda f, p: rectangle_method(RectangleType.LEFT, f, *p, True),
+    "Метод прямоугольников (средние)": lambda f, p: rectangle_method(RectangleType.MIDDLE, f, *p, True),
+    "Метод прямоугольников (правые)": lambda f, p: rectangle_method(RectangleType.RIGHT, f, *p, True),
+    "Метод Симпсона": lambda f, p: simpsons_method(f, *p, True)
 }
 
 if __name__ == '__main__':
@@ -25,4 +25,4 @@ if __name__ == '__main__':
     parameters = read_parameters()
 
     ans = method(function, parameters)
-    print(ans)
+    print(f"Ответ: {ans}")

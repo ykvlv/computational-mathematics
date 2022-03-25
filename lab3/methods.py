@@ -2,6 +2,7 @@ from enum import Enum
 from numpy import arange
 from sympy import Symbol
 from sympy.abc import x
+from termcolor import cprint
 
 from io_helper import fatal_error
 
@@ -12,23 +13,33 @@ class RectangleType(Enum):
     RIGHT = 3
 
 
-def rectangle_method(t: RectangleType, f: Symbol, a: float, b: float, n: int) -> float:
+def rectangle_method(t: RectangleType, f: Symbol, a: float, b: float, n: int,
+                     accuracy: float, check_runge: bool) -> float:
     h = (b - a) / n  # длина отрезка
-    a = arange(a, b, h)  # массив отрезков
+    if a == b:
+        return 0
+    arr = arange(a, b, h)  # массив отрезков
 
     if t == RectangleType.LEFT:
-        ans = h * sum(f.subs(x, xi) for xi in a)
+        ans = h * sum(f.subs(x, xi) for xi in arr)
     elif t == RectangleType.MIDDLE:
-        ans = h * sum(f.subs(x, xi + h / 2) for xi in a)
+        ans = h * sum(f.subs(x, xi + h / 2) for xi in arr)
     elif t == RectangleType.RIGHT:
-        ans = h * sum(f.subs(x, xi + h) for xi in a)
+        ans = h * sum(f.subs(x, xi + h) for xi in arr)
     else:
-        raise OSError("Дурка ебать")
+        raise RuntimeError("Поведение не определено")
 
+    if check_runge:
+        runge_ans = rectangle_method(t, f, a, b, n * 2, accuracy, False)
+        cprint(f"eps={abs(runge_ans - ans):.4f}\tn={n}: {ans:.4f}\tn={2*n}: {runge_ans:.4f}", "blue")
+        if abs(runge_ans - ans) < accuracy:
+            return runge_ans
+        else:
+            return rectangle_method(t, f, a, b, n * 2, accuracy, True)
     return ans
 
 
-def simpsons_method(f: Symbol, a: float, b: float, n: int) -> float:
+def simpsons_method(f: Symbol, a: float, b: float, n: int, accuracy: float, check_runge: bool) -> float:
     if n % 2 != 0:
         fatal_error("Для метода Симпсона необходимо четное число разбиений.")
     odds, evens = 0, 0
@@ -52,10 +63,19 @@ def simpsons_method(f: Symbol, a: float, b: float, n: int) -> float:
 
     yn = f.subs(x, right)
     # print(f"xn {right:.3f}\t\tyn {yn:.3f}")
-    return (h / 3) * (y0 + 4 * odds + 2 * evens + yn)
+    ans = (h / 3) * (y0 + 4 * odds + 2 * evens + yn)
+
+    if check_runge:
+        runge_ans = simpsons_method(f, a, b, n * 2, accuracy, False)
+        cprint(f"eps={abs(runge_ans - ans):.4f}\tn={n}: {ans:.4f}\tn={2*n}: {runge_ans:.4f}", "blue")
+        if abs(runge_ans - ans) < accuracy:
+            return runge_ans
+        else:
+            return simpsons_method(f, a, b, n * 2, accuracy, True)
+    return ans
 
 
-def simple_simpsons_method(f: Symbol, a: float, b: float, n: int) -> float:
+def simplified_simpsons_method(f: Symbol, a: float, b: float, n: int) -> float:
     if n % 2 != 0:
         fatal_error("Для метода Симпсона необходимо четное число разбиений.")
     h = (b - a) / n  # длина отрезка
@@ -64,7 +84,7 @@ def simple_simpsons_method(f: Symbol, a: float, b: float, n: int) -> float:
     y0 = f.subs(x, a)  # y нулевое
     yn = f.subs(x, b)  # y последнее
 
-    odds = sum(f.subs(x, arr[i]) for i in range(1, n, 2))  # результат функции на нечетных отрезках
-    evens = sum(f.subs(x, arr[i]) for i in range(2, n, 2))  # результат функции на четных отрезках
+    odds = sum(f.subs(x, xi) for xi in arr[1:n:2])  # результат функции на нечетных отрезках
+    evens = sum(f.subs(x, xi) for xi in arr[2:n:2])  # результат функции на четных отрезках
 
     return (h / 3) * (y0 + 4 * odds + 2 * evens + yn)  # формула Симпсона

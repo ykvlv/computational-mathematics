@@ -30,7 +30,7 @@ if __name__ == '__main__':
             sys.exit(e.errno)
 
     method = get_method(input_stream, with_invite)
-    report, table = method.solve()
+    report, table, graph = method.solve()
 
     if file_name:
         output_stream.write(report + "\n\n")
@@ -40,5 +40,6 @@ if __name__ == '__main__':
         output_stream.write(colored(report + "\n\n", "cyan"))
         output_stream.write(colored("Таблица итераций:\n" + str(table) + "\n", "blue"))
 
+    graph[0](graph[1], graph[2])
     input_stream.close()
     output_stream.close()

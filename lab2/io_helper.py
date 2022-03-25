@@ -97,7 +97,7 @@ def make_table(fields: [str], rows: [[str]]) -> PrettyTable:
     table.add_rows(rows)
 
     table.border = False
-    table.float_format = ".3"
+    table.float_format = ".5"
     return table
 
 
@@ -130,6 +130,28 @@ def show_graph(f: Callable[[float], float], root: float) -> None:
     plt.show()
 
 
+def show_graph_2(func1, func2):
+    f = [func1, func2]
+    bx = 2.5
+    x1 = np.linspace(-bx, bx, 100)
+    x2 = np.linspace(-bx, bx, 100)
+    f1 = np.zeros((x1.size, x2.size))
+    f2 = np.zeros((x1.size, x2.size))
+
+    for kf, g in enumerate((f1, f2)):
+        for i, deta in enumerate(x2):
+            for j, beta in enumerate(x1):
+                g[j, i] = f[kf](beta, deta)
+
+    X, Y = np.meshgrid(x1, x2)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(X, Y, f1)
+    ax.plot_surface(X, Y, f2)
+    plt.show()
+
+
 def print_help() -> None:
     print("Лабораторная 2. Численное решение нелинейных уравнений и систем.")
     print("\t--help — помощь")
@@ -144,31 +166,37 @@ def print_help() -> None:
 
 functions = [
     [
-        'f1(x1, x2) = 0.1 * x1^2 + x1 + 0.2 * x2^2 - 0.3',
-        lambda x1, x2: 0.3 - 0.1 * x1 ** 2 - 0.2 * x2 ** 2
+        'f(x, y) = x + 0.1 * x^2 + x + 0.2 * y^2 - 0.3',
+        lambda x, y: 0.3 - 0.1 * x ** 2 - 0.2 * y ** 2,
+        lambda x, y: 0.1 * x ** 2 + x + 0.2 * y ** 2 - 0.3
     ],
     [
-        'f1(x1, x2) = x1 - sin(2 * x2^2 + 3)',
-        lambda x1, x2: sin(2 * x2 ** 2 + 3)
+        'f(x, y) = x - sin(2 * y^2 + 3)',
+        lambda x, y: sin(2 * y ** 2 + 3),
+        lambda x, y: x - sin(2 * y ** 2 + 3),
     ],
     [
-        'f2(x1, x2) = 0.2 * x1^2 + x2 + 0.1 * x1 * x2 - 0.7',
-        lambda x1, x2: 0.7 - 0.2 * x1 ** 2 - 0.1 * x1 * x2
+        'f(x, y) = 0.2 * x^2 + y + 0.1 * x * x2 - 0.7',
+        lambda x, y: 0.7 - 0.2 * x ** 2 - 0.1 * x * y,
+        lambda x, y: 0.2 * x ** 2 + y + 0.1 * x * y - 0.7
     ],
     [
-        'f2(x1, x2) = exp(x1^3 - 8 * x1^2) + 4 * x2',
-        lambda x1, x2: -exp(x1 ** 3 - 8 * x1 ** 2) / 4
+        'f(x, y) = exp(x^3 - 8 * x^2) + 4 * y',
+        lambda x, y: -exp(x ** 3 - 8 * x ** 2) / 4,
+        lambda x, y: exp(x ** 3 - 8 * x ** 2) + 4 * y
     ]
 ]
 
 
 def read_system(input_stream: TextIO, with_invite: bool) -> tuple:
-    f1 = functions[choose_from_list(input_stream, functions, "Выберите 1ю функцию", with_invite)][1]
-    a1 = read_parameter(input_stream, "Начальное приближение 1ой функции", with_invite)
-
-    f2 = functions[choose_from_list(input_stream, functions, "Выберите 2ую функцию", with_invite)][1]
-    a2 = read_parameter(input_stream, "Начальное приближение 2ой функции", with_invite)
+    func1 = functions[choose_from_list(input_stream, functions, "Выберите 1ю функцию", with_invite)]
+    func2 = functions[choose_from_list(input_stream, functions, "Выберите 2ую функцию", with_invite)]
+    if func1 == func2:
+        error("Функции должны быть различными")
+        return read_system(input_stream, with_invite)
+    a1 = read_parameter(input_stream, "Начальное приближение x", with_invite)
+    a2 = read_parameter(input_stream, "Начальное приближение y", with_invite)
 
     accuracy = read_accuracy(input_stream, with_invite)
 
-    return f1, a1, f2, a2, accuracy
+    return func1, a1, func2, a2, accuracy

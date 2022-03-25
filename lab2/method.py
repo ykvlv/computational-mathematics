@@ -1,4 +1,4 @@
-from typing import TextIO
+from typing import TextIO, Tuple
 
 from prettytable import PrettyTable
 
@@ -16,9 +16,9 @@ class Method:
         self.method = method
         self.args = args
 
-    def solve(self) -> tuple[str, PrettyTable]:
-        report, table = self.method(f, *self.args)
-        return report, table
+    def solve(self) -> Tuple[str, PrettyTable, tuple]:
+        report, table, graph = self.method(f, *self.args)
+        return report, table, graph
 
 
 methods = [
@@ -45,7 +45,7 @@ def get_method(input_stream: TextIO, with_invite: bool) -> Method:
     elif method_number == 1:
         return Method(secant_method, read_data(input_stream, False, with_invite))
     elif method_number == 2:
-        return Method(simple_iteration_method, read_data(input_stream, True, with_invite))
+        return Method(simple_iteration_method, read_data(input_stream, False, with_invite))
     elif method_number == 3:
         return Method(system_simple_iteration_method, read_system(input_stream, with_invite))
     else:

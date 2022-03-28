@@ -2,7 +2,7 @@ from typing import TextIO, Tuple
 
 from prettytable import PrettyTable
 
-from methods import chord_method, secant_method, simple_iteration_method, system_simple_iteration_method
+from methods import chord_method, simple_iteration_method, system_simple_iteration_method
 from io_helper import read_data, fatal_error, read_system, choose_from_list
 
 
@@ -26,9 +26,6 @@ methods = [
         "Метод хорд",
         chord_method
     ], [
-        "Метод секущих",
-        secant_method
-    ], [
         "Метод простой итерации",
         simple_iteration_method
     ], [
@@ -43,10 +40,8 @@ def get_method(input_stream: TextIO, with_invite: bool) -> Method:
     if method_number == 0:
         return Method(chord_method, read_data(input_stream, False, with_invite))
     elif method_number == 1:
-        return Method(secant_method, read_data(input_stream, False, with_invite))
-    elif method_number == 2:
         return Method(simple_iteration_method, read_data(input_stream, False, with_invite))
-    elif method_number == 3:
+    elif method_number == 2:
         return Method(system_simple_iteration_method, read_system(input_stream, with_invite))
     else:
         fatal_error("Такого метода не существует.")

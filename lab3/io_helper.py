@@ -33,8 +33,8 @@ def read_float(invite: str) -> float:
 def read_accuracy(invite: str) -> float:
     while True:
         accuracy = read_float(invite)
-        if accuracy <= 0 or accuracy >= 1:
-            fatal_error("Значение погрешности вычисления должно находиться в промежутке (0, 1)")
+        if accuracy <= 0 or accuracy > 1:
+            error("Значение погрешности вычисления должно находиться в промежутке (0, 1]")
         else:
             return accuracy
 

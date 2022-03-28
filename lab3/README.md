@@ -18,56 +18,72 @@
     - Вычислить интеграл по формулам средних прямоугольников, трапеций и Симпсона при *n = 6*
     - Сравнить результаты с точным значением интеграла
     - Определить относительную погрешность вычислений
-    - В отчете отразить последовательные вычисления
 
 ## Рабочие формулы методов
-Будут позже
+Метод прямоугольников:
 
+![rectangle](./pics/rectangle.png)
+
+Метод Симпсона:
+
+![simpson](./pics/simpson.png)
+
+Правило Рунге:
+
+![runge](./pics/runge.png)
 ## Листинг программы
-`f.subs(x, число)` — подставить вместо x число и посчитать функцию
+`f.subs(x, число)` — подставляет число в формулу `f(x)` и возвращает результат
 
 Метод прямоугольников:
 ```python
-def rectangle_method(t: RectangleType, f: Symbol, a: float, b: float, n: int) -> float:
+def rectangle_method(t: RectangleType, f: Symbol, a: float, b: float, n: int,
+                     accuracy: float, check_runge: bool) -> float:
     h = (b - a) / n  # длина отрезка
-    a = arange(a, b, h)  # массив отрезков
+    if a == b:
+        return 0
+    arr = arange(a, b, h)  # массив отрезков
 
     if t == RectangleType.LEFT:
-        ans = h * sum(f.subs(x, xi) for xi in a)
+        ans = h * sum(f.subs(x, xi) for xi in arr)
     elif t == RectangleType.MIDDLE:
-        ans = h * sum(f.subs(x, xi + h / 2) for xi in a)
+        ans = h * sum(f.subs(x, xi + h / 2) for xi in arr)
     elif t == RectangleType.RIGHT:
-        ans = h * sum(f.subs(x, xi + h) for xi in a)
+        ans = h * sum(f.subs(x, xi + h) for xi in arr)
     else:
         raise RuntimeError("Поведение не определено")
 
+    if check_runge:
+        runge_ans = rectangle_method(t, f, a, b, n * 2, accuracy, False)
+        if abs(runge_ans - ans) < accuracy:
+            return runge_ans
+        else:
+            return rectangle_method(t, f, a, b, n * 2, accuracy, True)
     return ans
 ```
 
 Метод Симпсона:
 ```python
-def simpsons_method(f: Symbol, a: float, b: float, n: int) -> float:
+def simpsons_method(f: Symbol, a: float, b: float, n: int, accuracy: float, check_runge: bool) -> float:
     if n % 2 != 0:
         fatal_error("Для метода Симпсона необходимо четное число разбиений.")
-    odds, evens = 0, 0
+    h = (b - a) / n  # длина каждого отрезка
+    arr = arange(a, b, h)  # массив отрезков
 
-    # инициализация
-    h = (b - a) / n
-    left = a
-    right = left + h
-    y0 = f.subs(x, left)
+    y0 = f.subs(x, a)  # y нулевое
+    yn = f.subs(x, b)  # y последнее
 
-    for i in range(1, n):
-        curr = f.subs(x, right)
-        if i % 2 == 0:
-            evens += curr
+    odds = sum(f.subs(x, xi) for xi in arr[1:n:2])  # результат функции на нечетных отрезках
+    evens = sum(f.subs(x, xi) for xi in arr[2:n:2])  # результат функции на четных отрезках
+    
+    ans = (h / 3) * (y0 + 4 * odds + 2 * evens + yn)  # формула Симпсона
+    
+    if check_runge:
+        runge_ans = simpsons_method(f, a, b, n * 2, accuracy, False)
+        if abs(runge_ans - ans) < accuracy:
+            return runge_ans
         else:
-            odds += curr
-        left = right
-        right = left + h
-
-    yn = f.subs(x, right)
-    return (h / 3) * (y0 + 4 * odds + 2 * evens + yn)
+            return simpsons_method(f, a, b, n * 2, accuracy, True)
+    return ans
 ```
 
 ## Результаты выполнения программы
@@ -106,7 +122,8 @@ ykvlv@MacBook lab3 % python3 main.py
 ```
 
 ## Вычисление заданного интеграла
-Будет позже
+![first](./pics/first.png)
+![second](./pics/second.png)
 
 ## Выводы
 Я познакомился с различными методами решения интегралов. 

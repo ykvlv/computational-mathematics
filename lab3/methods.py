@@ -42,28 +42,16 @@ def rectangle_method(t: RectangleType, f: Symbol, a: float, b: float, n: int,
 def simpsons_method(f: Symbol, a: float, b: float, n: int, accuracy: float, check_runge: bool) -> float:
     if n % 2 != 0:
         fatal_error("Для метода Симпсона необходимо четное число разбиений.")
-    odds, evens = 0, 0
+    h = (b - a) / n  # длина каждого отрезка
+    arr = arange(a, b, h)  # массив отрезков
 
-    # инициализация
-    h = (b - a) / n
-    left = a
-    right = left + h
-    y0 = f.subs(x, left)
-    # print(f"x0 {left:.3f}\t\ty0 {y0:.3f}")
+    y0 = f.subs(x, a)  # y нулевое
+    yn = f.subs(x, b)  # y последнее
 
-    for i in range(1, n):
-        curr = f.subs(x, right)
-        if i % 2 == 0:
-            evens += curr
-        else:
-            odds += curr
-        left = right
-        right = left + h
-        # print(f"x{i} {left:.3f}\t\ty{i} {curr:.3f}")
+    odds = sum(f.subs(x, xi) for xi in arr[1:n:2])  # результат функции на нечетных отрезках
+    evens = sum(f.subs(x, xi) for xi in arr[2:n:2])  # результат функции на четных отрезках
 
-    yn = f.subs(x, right)
-    # print(f"xn {right:.3f}\t\tyn {yn:.3f}")
-    ans = (h / 3) * (y0 + 4 * odds + 2 * evens + yn)
+    ans = (h / 3) * (y0 + 4 * odds + 2 * evens + yn)  # формула Симпсона
 
     if check_runge:
         runge_ans = simpsons_method(f, a, b, n * 2, accuracy, False)
@@ -73,18 +61,3 @@ def simpsons_method(f: Symbol, a: float, b: float, n: int, accuracy: float, chec
         else:
             return simpsons_method(f, a, b, n * 2, accuracy, True)
     return ans
-
-
-def simplified_simpsons_method(f: Symbol, a: float, b: float, n: int) -> float:
-    if n % 2 != 0:
-        fatal_error("Для метода Симпсона необходимо четное число разбиений.")
-    h = (b - a) / n  # длина отрезка
-    arr = arange(a, b, h)  # массив отрезков
-
-    y0 = f.subs(x, a)  # y нулевое
-    yn = f.subs(x, b)  # y последнее
-
-    odds = sum(f.subs(x, xi) for xi in arr[1:n:2])  # результат функции на нечетных отрезках
-    evens = sum(f.subs(x, xi) for xi in arr[2:n:2])  # результат функции на четных отрезках
-
-    return (h / 3) * (y0 + 4 * odds + 2 * evens + yn)  # формула Симпсона
